@@ -38,7 +38,7 @@ namespace block
                 command = new NpgsqlCommand(sql, con);
                 command.ExecuteNonQuery();
 
-                sql = "UPDATE drug  SET name = '" + name + "', manufacturer = '" + manuf + "' WHERE id = " + dataGridView1.Rows[nowRow].Cells[0].Value  /*+ " and pg_try_advisory_xact_lock(tableoid::INTEGER,id)"*/;             
+                sql = "UPDATE drug  SET name = '" + name + "', manufacturer = '" + manuf + "' WHERE id = " + dataGridView1.Rows[nowRow].Cells[0].Value /*+ " and pg_try_advisory_xact_lock(tableoid::INTEGER,id)"*/;             
                 command = new NpgsqlCommand(sql, con);
                 command.Transaction = tr;
                 command.ExecuteNonQuery();
@@ -48,6 +48,7 @@ namespace block
             }
             catch (Exception ex)
             {
+                tr.Rollback();
                 MessageBox.Show(ex.Message);
             }
         }
@@ -77,7 +78,7 @@ namespace block
                 string constr = "Server=127.0.0.1; Port=5432; User Id=postgres; Password=22; Database=polyclinicver3;";
                 con = new NpgsqlConnection(constr);
                 con.Open();
-                tr = con.BeginTransaction(IsolationLevel.Serializable);
+                tr = con.BeginTransaction(IsolationLevel.RepeatableRead);
 
                 command = con.CreateCommand();
                 command.Transaction = tr;
